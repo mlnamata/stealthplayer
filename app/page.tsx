@@ -16,34 +16,34 @@ interface RecentVideo extends Video {
 
 const ASMR_VIDEOS = [
   {
-    id: 'dQw4w9WgXcQ',
-    title: 'Never Gonna Give You Up',
-    category: 'Chill',
-    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    id: '8bPmOJZcIYo',
+    title: 'ASMR Head & Shoulder Massage with Whispers',
+    category: 'ASMR',
+    thumbnail: 'https://i.ytimg.com/vi/8bPmOJZcIYo/maxresdefault.jpg',
   },
   {
-    id: 'jNQXAC9IVRw',
-    title: 'Me at the zoo - original YouTube video',
-    category: 'Classic',
-    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg',
+    id: 'mWz1u-vJAzk',
+    title: 'ASMR Relaxing Scalp Massage & Scratching',
+    category: 'ASMR',
+    thumbnail: 'https://i.ytimg.com/vi/mWz1u-vJAzk/maxresdefault.jpg',
   },
   {
-    id: '9bZkp7q19f0',
-    title: 'PSY - GANGNAM STYLE(강남스타일)',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
+    id: 'iHKJl35-nxA',
+    title: 'ASMR Deep Relaxation - 3 Hour Sleep Meditation',
+    category: 'Sleep',
+    thumbnail: 'https://i.ytimg.com/vi/iHKJl35-nxA/maxresdefault.jpg',
   },
   {
-    id: 'kJQP7kiw9Fk',
-    title: 'Luis Fonsi - Despacito',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/maxresdefault.jpg',
+    id: 'd_FNzHwXPiE',
+    title: 'ASMR Spa Facial Massage with Soft Speaking',
+    category: 'Wellness',
+    thumbnail: 'https://i.ytimg.com/vi/d_FNzHwXPiE/maxresdefault.jpg',
   },
   {
-    id: 'owJRjWcJlSY',
-    title: 'Cardi B, Bad Bunny, J Balvin - I Like It',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/maxresdefault.jpg',
+    id: 'fO-3vVYYKa8',
+    title: 'ASMR Haircut & Hair Brushing Roleplay',
+    category: 'ASMR',
+    thumbnail: 'https://i.ytimg.com/vi/fO-3vVYYKa8/maxresdefault.jpg',
   },
 ];
 
@@ -197,8 +197,8 @@ export default function Home() {
         {/* ASMR Videos Section */}
         <section className="mb-16">
           <div className="flex items-center gap-2 mb-8">
-            <h3 className="text-2xl font-bold text-white">🎵 Populární Videa</h3>
-            <span className="text-gray-400 text-sm">(Příklady - klikni a přehrávej)</span>
+            <h3 className="text-2xl font-bold text-white">🎵 ASMR a Relaxační Videa</h3>
+            <span className="text-gray-400 text-sm">(Tipy - klikni a přehrávej)</span>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
