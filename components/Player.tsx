@@ -257,6 +257,8 @@ export default function Player() {
               <YouTube
                 videoId={videoId}
                 opts={opts}
+                className="w-full h-full"
+                iframeClassName="w-full h-full"
                 onReady={onReady}
                 onStateChange={onStateChange}
                 onError={onError}

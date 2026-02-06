@@ -19,31 +19,31 @@ const ASMR_VIDEOS = [
     id: 'dQw4w9WgXcQ',
     title: 'Never Gonna Give You Up - Chill Version',
     category: 'Chill',
-    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
   },
   {
     id: 'jNQXAC9IVRw',
     title: 'Me at the zoo - First YouTube Video',
     category: 'Classic',
-    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg',
   },
   {
     id: '9bZkp7q19f0',
     title: 'PSY - GANGNAM STYLE - Music Video',
     category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg',
   },
   {
     id: 'kJQP7kiw9Fk',
     title: 'Luis Fonsi - Despacito Official Video',
     category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/hqdefault.jpg',
   },
   {
     id: 'owJRjWcJlSY',
     title: 'Cardi B - I Like It Official Video',
     category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/hqdefault.jpg',
   },
 ];
 
