@@ -5,6 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
 
+interface QueueItem {
+  id: string;
+  title: string;
+}
+
 // Error boundary component
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {
@@ -54,6 +59,9 @@ export default function Player() {
   const [isPrivacyMode, setIsPrivacyMode] = useState(true);
   const [isRevealing, setIsRevealing] = useState(false);
   const [savedVideos, setSavedVideos] = useState<string[]>([]);
+  const [queueVideos, setQueueVideos] = useState<QueueItem[]>([]);
+  const [currentQueueIndex, setCurrentQueueIndex] = useState(-1);
+  const [queueError, setQueueError] = useState('');
   const playerRef = useRef<YouTubePlayer | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -65,6 +73,15 @@ export default function Player() {
         setSavedVideos(JSON.parse(saved));
       } catch (e) {
         console.error('Failed to parse saved videos', e);
+      }
+    }
+
+    const queueStored = localStorage.getItem('queueVideos');
+    if (queueStored) {
+      try {
+        setQueueVideos(JSON.parse(queueStored));
+      } catch (e) {
+        console.error('Failed to parse queue videos', e);
       }
     }
   }, []);
@@ -127,6 +144,94 @@ export default function Player() {
     }
   };
 
+  const updateQueue = (updated: QueueItem[]) => {
+    setQueueVideos(updated);
+    localStorage.setItem('queueVideos', JSON.stringify(updated));
+  };
+
+  const addUrlToQueue = () => {
+    const id = extractVideoId(videoUrl);
+    if (!id) {
+      setQueueError('Neplatna YouTube URL');
+      return;
+    }
+
+    if (queueVideos.some((video) => video.id === id)) {
+      setQueueError('Video uz je ve fronte');
+      return;
+    }
+
+    updateQueue([...queueVideos, { id, title: `Video ${id}` }]);
+    setQueueError('');
+  };
+
+  const playQueueIndex = (index: number) => {
+    const item = queueVideos[index];
+    if (!item) {
+      return;
+    }
+    setVideoId(item.id);
+    setIsPrivacyMode(true);
+    setCurrentQueueIndex(index);
+  };
+
+  const playNext = () => {
+    if (currentQueueIndex >= 0 && currentQueueIndex < queueVideos.length - 1) {
+      playQueueIndex(currentQueueIndex + 1);
+    }
+  };
+
+  const playPrevious = () => {
+    if (currentQueueIndex > 0) {
+      playQueueIndex(currentQueueIndex - 1);
+    }
+  };
+
+  const removeFromQueue = (id: string) => {
+    const removeIndex = queueVideos.findIndex((item) => item.id === id);
+    if (removeIndex === -1) {
+      return;
+    }
+
+    const updated = queueVideos.filter((item) => item.id !== id);
+    updateQueue(updated);
+
+    if (id === videoId) {
+      const nextItem = updated[removeIndex] || updated[removeIndex - 1];
+      if (nextItem) {
+        setVideoId(nextItem.id);
+        setIsPrivacyMode(true);
+        setCurrentQueueIndex(updated.findIndex((item) => item.id === nextItem.id));
+      } else {
+        setVideoId(null);
+        setCurrentQueueIndex(-1);
+      }
+    } else if (currentQueueIndex > removeIndex) {
+      setCurrentQueueIndex((index) => Math.max(index - 1, 0));
+    }
+  };
+
+  const clearQueue = () => {
+    updateQueue([]);
+    setCurrentQueueIndex(-1);
+  };
+
+  useEffect(() => {
+    if (!videoId) {
+      setCurrentQueueIndex(-1);
+      return;
+    }
+
+    if (queueVideos.length === 0) {
+      updateQueue([{ id: videoId, title: `Video ${videoId}` }]);
+      setCurrentQueueIndex(0);
+      return;
+    }
+
+    const index = queueVideos.findIndex((item) => item.id === videoId);
+    setCurrentQueueIndex(index);
+  }, [videoId, queueVideos]);
+
   const onReady: YouTubeProps['onReady'] = (event) => {
     playerRef.current = event.target;
     setDuration(event.target.getDuration());
@@ -136,6 +241,18 @@ export default function Player() {
   const onStateChange: YouTubeProps['onStateChange'] = (event) => {
     // 1 = playing, 2 = paused
     setIsPlaying(event.data === 1);
+
+    if (event.data === 0 && currentQueueIndex >= 0) {
+      const nextIndex = currentQueueIndex + 1;
+      if (nextIndex < queueVideos.length) {
+        const nextVideo = queueVideos[nextIndex];
+        if (nextVideo) {
+          setVideoId(nextVideo.id);
+          setIsPrivacyMode(true);
+          setCurrentQueueIndex(nextIndex);
+        }
+      }
+    }
   };
 
   const togglePlayPause = () => {
@@ -245,7 +362,14 @@ export default function Player() {
             >
               Načíst
             </button>
+            <button
+              onClick={addUrlToQueue}
+              className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+            >
+              Pridat do fronty
+            </button>
           </div>
+          {queueError && <p className="text-yellow-400 text-sm mt-2">{queueError}</p>}
         </div>
 
       {/* Player */}
@@ -387,6 +511,75 @@ export default function Player() {
           </div>
         </div>
       )}
+
+      {/* Queue Section */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-white">Fronta</h3>
+            <span className="text-gray-400 text-sm">({queueVideos.length})</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={playPrevious}
+              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs font-medium transition-colors"
+            >
+              Predchozi
+            </button>
+            <button
+              onClick={playNext}
+              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
+            >
+              Dalsi
+            </button>
+            <button
+              onClick={clearQueue}
+              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs font-medium transition-colors"
+            >
+              Vymazat
+            </button>
+          </div>
+        </div>
+
+        {queueVideos.length === 0 ? (
+          <div className="text-gray-400 text-sm">Fronta je prazdna.</div>
+        ) : (
+          <div className="space-y-3">
+            {queueVideos.map((item, index) => (
+              <div
+                key={item.id}
+                className={`flex items-center justify-between gap-4 rounded-lg border p-3 ${
+                  index === currentQueueIndex
+                    ? 'border-blue-500/70 bg-blue-600/10'
+                    : 'border-gray-700/50 bg-gray-900/40'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-gray-500 text-xs w-6 text-right">{index + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{item.title}</p>
+                    <p className="text-gray-500 text-xs truncate">{item.id}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => playQueueIndex(index)}
+                    className="px-3 py-1.5 bg-blue-600/70 hover:bg-blue-600 text-white rounded-md text-xs font-medium transition-colors"
+                  >
+                    Prehrat
+                  </button>
+                  <button
+                    onClick={() => removeFromQueue(item.id)}
+                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-xs font-medium transition-colors"
+                  >
+                    Odebrat
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Info */}
       {!videoId && (

@@ -14,44 +14,19 @@ interface RecentVideo extends Video {
   timestamp: number;
 }
 
-const ASMR_VIDEOS = [
-  {
-    id: 'dQw4w9WgXcQ',
-    title: 'Never Gonna Give You Up - Chill Version',
-    category: 'Chill',
-    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
-  },
-  {
-    id: 'jNQXAC9IVRw',
-    title: 'Me at the zoo - First YouTube Video',
-    category: 'Classic',
-    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg',
-  },
-  {
-    id: '9bZkp7q19f0',
-    title: 'PSY - GANGNAM STYLE - Music Video',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg',
-  },
-  {
-    id: 'kJQP7kiw9Fk',
-    title: 'Luis Fonsi - Despacito Official Video',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/hqdefault.jpg',
-  },
-  {
-    id: 'owJRjWcJlSY',
-    title: 'Cardi B - I Like It Official Video',
-    category: 'Music',
-    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/hqdefault.jpg',
-  },
-];
+interface QueueItem {
+  id: string;
+  title: string;
+}
+
 
 export default function Home() {
   const [customUrl, setCustomUrl] = useState('');
   const [urlError, setUrlError] = useState('');
   const [recentVideos, setRecentVideos] = useState<RecentVideo[]>([]);
   const [savedVideos, setSavedVideos] = useState<string[]>([]);
+  const [queueVideos, setQueueVideos] = useState<QueueItem[]>([]);
+  const [queueError, setQueueError] = useState('');
 
   useEffect(() => {
     // Load recent videos from localStorage
@@ -71,6 +46,16 @@ export default function Home() {
         setSavedVideos(JSON.parse(savedStored));
       } catch (e) {
         console.error('Failed to parse saved videos', e);
+      }
+    }
+
+    // Load queue videos from localStorage
+    const queueStored = localStorage.getItem('queueVideos');
+    if (queueStored) {
+      try {
+        setQueueVideos(JSON.parse(queueStored));
+      } catch (e) {
+        console.error('Failed to parse queue videos', e);
       }
     }
   }, []);
@@ -107,6 +92,45 @@ export default function Home() {
     } else {
       setUrlError('Neplatná YouTube URL');
     }
+  };
+
+  const updateQueue = (updated: QueueItem[]) => {
+    setQueueVideos(updated);
+    localStorage.setItem('queueVideos', JSON.stringify(updated));
+  };
+
+  const addToQueueFromUrl = () => {
+    const videoId = extractVideoId(customUrl);
+    if (!videoId) {
+      setQueueError('Neplatna YouTube URL');
+      return;
+    }
+
+    if (queueVideos.some((video) => video.id === videoId)) {
+      setQueueError('Video uz je ve fronte');
+      return;
+    }
+
+    const updated = [...queueVideos, { id: videoId, title: `Video ${videoId}` }];
+    updateQueue(updated);
+    setQueueError('');
+  };
+
+  const playQueue = () => {
+    if (queueVideos.length === 0) {
+      setQueueError('Fronta je prazdna');
+      return;
+    }
+    window.location.href = `/player?v=${queueVideos[0].id}`;
+  };
+
+  const removeFromQueue = (videoId: string) => {
+    const updated = queueVideos.filter((video) => video.id !== videoId);
+    updateQueue(updated);
+  };
+
+  const clearQueue = () => {
+    updateQueue([]);
   };
 
   const VideoCard = ({ video }: { video: Video }) => (
@@ -189,40 +213,79 @@ export default function Home() {
               >
                 Přehrát
               </button>
+              <button
+                type="button"
+                onClick={addToQueueFromUrl}
+                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
+              >
+                Pridat do fronty
+              </button>
             </div>
             {urlError && <p className="text-red-400 text-sm mt-2">{urlError}</p>}
+            {queueError && <p className="text-yellow-400 text-sm mt-2">{queueError}</p>}
           </form>
         </section>
 
-        {/* ASMR Videos Section */}
-        <section className="mb-16">
-          <div className="flex items-center gap-2 mb-8">
-            <h3 className="text-2xl font-bold text-white">🎵 Populární Videa</h3>
-            <span className="text-gray-400 text-sm">(Příklady - klikni a přehrávej)</span>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {ASMR_VIDEOS.map((video) => (
-              <VideoCard key={video.id} video={video} />
-            ))}
-          </div>
-        </section>
-
-        {/* Recent Videos Section */}
-        {recentVideos.length > 0 && (
-          <section className="mb-16">
-            <div className="flex items-center gap-2 mb-8">
-              <h3 className="text-2xl font-bold text-white">⏱️ Nedávno Přehrána</h3>
-              <span className="text-gray-400 text-sm">({recentVideos.length})</span>
+        {/* Queue Section */}
+        <section className="mb-16 border-t-2 border-blue-700/50 pt-8">
+          <div className="flex items-center justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2">
+              <h3 className="text-2xl font-bold text-white">Fronta</h3>
+              <span className="text-gray-400 text-sm">({queueVideos.length})</span>
             </div>
+            <div className="flex gap-2">
+              <button
+                onClick={playQueue}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Prehrat frontu
+              </button>
+              <button
+                onClick={clearQueue}
+                className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
+              >
+                Vymazat
+              </button>
+            </div>
+          </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {recentVideos.map((video) => (
-                <VideoCard key={video.id} video={video} />
+          {queueVideos.length === 0 ? (
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/30 text-center text-gray-400 text-sm">
+              Fronta je prazdna. Pridavej videa pres pole nahore.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {queueVideos.map((video, index) => (
+                <div
+                  key={video.id}
+                  className="flex items-center justify-between gap-4 bg-gray-800/50 border border-gray-700/50 rounded-lg p-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-gray-500 text-sm w-6 text-right">{index + 1}</span>
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{video.title}</p>
+                      <p className="text-gray-500 text-xs truncate">{video.id}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/player?v=${video.id}`}
+                      className="px-3 py-1.5 bg-blue-600/70 hover:bg-blue-600 text-white rounded-md text-xs font-medium transition-colors"
+                    >
+                      Prehrat
+                    </Link>
+                    <button
+                      onClick={() => removeFromQueue(video.id)}
+                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-xs font-medium transition-colors"
+                    >
+                      Odebrat
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* Saved Videos Section */}
         {savedVideos.length > 0 && (
@@ -233,8 +296,7 @@ export default function Home() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {[...ASMR_VIDEOS, ...recentVideos]
-                .filter((video, idx, arr) => arr.findIndex((v) => v.id === video.id) === idx)
+              {recentVideos
                 .filter((video) => savedVideos.includes(video.id))
                 .map((video) => (
                   <VideoCard key={video.id} video={video} />
