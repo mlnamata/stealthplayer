@@ -33,6 +33,16 @@ export default function Player() {
     }
   }, []);
 
+  // Update video ID from search params
+  useEffect(() => {
+    if (searchParams) {
+      const v = searchParams.get('v');
+      if (v) {
+        setVideoId(v);
+      }
+    }
+  }, [searchParams]);
+
   // Extrakce YouTube video ID z URL
   const extractVideoId = (url: string): string | null => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -185,14 +195,13 @@ export default function Player() {
       {videoId && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
           <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-            {/* YouTube Player - skrytý pod vrstvou */}
-            <div className={`absolute inset-0 ${isPrivacyMode && !isRevealing ? 'invisible' : 'visible'}`}>
+            {/* YouTube Player - vždy rendován */}
+            <div className={`absolute inset-0 transition-opacity duration-200 ${isPrivacyMode && !isRevealing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <YouTube
                 videoId={videoId}
                 opts={opts}
                 onReady={onReady}
                 onStateChange={onStateChange}
-                className="w-full h-full"
               />
             </div>
 
