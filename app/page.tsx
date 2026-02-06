@@ -16,34 +16,34 @@ interface RecentVideo extends Video {
 
 const ASMR_VIDEOS = [
   {
-    id: '7rLlLPVEu1I',
-    title: 'ASMR Relaxing Sleep Music - 10 Hour Sleep Meditation',
-    category: 'Sleep',
-    thumbnail: 'https://i.ytimg.com/vi/7rLlLPVEu1I/maxresdefault.jpg',
+    id: 'dQw4w9WgXcQ',
+    title: 'Never Gonna Give You Up - Chill Version',
+    category: 'Chill',
+    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
   },
   {
-    id: 'wlWnc44x0CQ',
-    title: 'ASMR Inaudible Whispering - Relaxation',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/wlWnc44x0CQ/maxresdefault.jpg',
+    id: 'jNQXAC9IVRw',
+    title: 'Me at the zoo - First YouTube Video',
+    category: 'Classic',
+    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg',
   },
   {
-    id: 'F80VEfukBsk',
-    title: 'ASMR Deep Sleep & Relaxation - 8 Hours',
-    category: 'Sleep',
-    thumbnail: 'https://i.ytimg.com/vi/F80VEfukBsk/maxresdefault.jpg',
+    id: '9bZkp7q19f0',
+    title: 'PSY - GANGNAM STYLE - Music Video',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
   },
   {
-    id: 'TzPnPBlC5Q0',
-    title: 'ASMR Personal Attention - Soft Spoken',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/TzPnPBlC5Q0/maxresdefault.jpg',
+    id: 'kJQP7kiw9Fk',
+    title: 'Luis Fonsi - Despacito Official Video',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/maxresdefault.jpg',
   },
   {
-    id: 'Fzis5VJfqFo',
-    title: 'ASMR Relaxing Ambience - Nature Sounds',
-    category: 'Nature',
-    thumbnail: 'https://i.ytimg.com/vi/Fzis5VJfqFo/maxresdefault.jpg',
+    id: 'owJRjWcJlSY',
+    title: 'Cardi B - I Like It Official Video',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/maxresdefault.jpg',
   },
 ];
 
@@ -197,8 +197,8 @@ export default function Home() {
         {/* ASMR Videos Section */}
         <section className="mb-16">
           <div className="flex items-center gap-2 mb-8">
-            <h3 className="text-2xl font-bold text-white">🎵 ASMR a Relaxační Videa</h3>
-            <span className="text-gray-400 text-sm">(Tipy - klikni a přehrávej)</span>
+            <h3 className="text-2xl font-bold text-white">🎵 Populární Videa</h3>
+            <span className="text-gray-400 text-sm">(Příklady - klikni a přehrávej)</span>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
