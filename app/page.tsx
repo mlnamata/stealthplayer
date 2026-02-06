@@ -84,7 +84,7 @@ export default function Home() {
 
   const addRecentVideo = (video: Video) => {
     const recent: RecentVideo = { ...video, timestamp: Date.now() };
-    const updated = [recent, ...recentVideos.filter((v) => v.id !== video.id)].slice(0, 10);
+    const updated = [recent, ...recentVideos.filter((v) => v.id !== video.id)].slice(0, 5);
     setRecentVideos(updated);
     localStorage.setItem('recentVideos', JSON.stringify(updated));
   };
