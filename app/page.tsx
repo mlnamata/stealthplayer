@@ -16,34 +16,34 @@ interface RecentVideo extends Video {
 
 const ASMR_VIDEOS = [
   {
-    id: 'V-aeltHgo-w',
-    title: 'ASMR Deep Tissue Massage',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/V-aeltHgo-w/maxresdefault.jpg',
+    id: 'dQw4w9WgXcQ',
+    title: 'Never Gonna Give You Up',
+    category: 'Chill',
+    thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
   },
   {
-    id: '4ZHWc7tIZwE',
-    title: 'ASMR Relaxing Rain Sounds',
-    category: 'Nature',
-    thumbnail: 'https://i.ytimg.com/vi/4ZHWc7tIZwE/maxresdefault.jpg',
+    id: 'jNQXAC9IVRw',
+    title: 'Me at the zoo - original YouTube video',
+    category: 'Classic',
+    thumbnail: 'https://i.ytimg.com/vi/jNQXAC9IVRw/maxresdefault.jpg',
   },
   {
-    id: 'I7bq8-8rVe8',
-    title: 'ASMR Head Massage and Scratching',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/I7bq8-8rVe8/maxresdefault.jpg',
+    id: '9bZkp7q19f0',
+    title: 'PSY - GANGNAM STYLE(강남스타일)',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg',
   },
   {
-    id: 'fd8-cXPfnkk',
-    title: 'ASMR Spa Massage Tutorial',
-    category: 'Wellness',
-    thumbnail: 'https://i.ytimg.com/vi/fd8-cXPfnkk/maxresdefault.jpg',
+    id: 'kJQP7kiw9Fk',
+    title: 'Luis Fonsi - Despacito',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/kJQP7kiw9Fk/maxresdefault.jpg',
   },
   {
-    id: 'h8EwmxYxGvM',
-    title: 'ASMR Fantasy Haircut Roleplay',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/h8EwmxYxGvM/maxresdefault.jpg',
+    id: 'owJRjWcJlSY',
+    title: 'Cardi B, Bad Bunny, J Balvin - I Like It',
+    category: 'Music',
+    thumbnail: 'https://i.ytimg.com/vi/owJRjWcJlSY/maxresdefault.jpg',
   },
 ];
 
@@ -197,8 +197,8 @@ export default function Home() {
         {/* ASMR Videos Section */}
         <section className="mb-16">
           <div className="flex items-center gap-2 mb-8">
-            <h3 className="text-2xl font-bold text-white">🎵 ASMR a Relaxační Videa</h3>
-            <span className="text-gray-400 text-sm">(Tipy - klikni a přehrávej)</span>
+            <h3 className="text-2xl font-bold text-white">🎵 Populární Videa</h3>
+            <span className="text-gray-400 text-sm">(Příklady - klikni a přehrávej)</span>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
