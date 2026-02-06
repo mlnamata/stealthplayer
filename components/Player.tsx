@@ -1,0 +1,330 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
+
+export default function Player() {
+  const searchParams = useSearchParams();
+  const initialVideoId = searchParams?.get('v') || null;
+
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoId, setVideoId] = useState<string | null>(initialVideoId);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(50);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPrivacyMode, setIsPrivacyMode] = useState(true);
+  const [isRevealing, setIsRevealing] = useState(false);
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Extrakce YouTube video ID z URL
+  const extractVideoId = (url: string): string | null => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[7].length === 11 ? match[7] : null;
+  };
+
+  const handleLoadVideo = () => {
+    const id = extractVideoId(videoUrl);
+    if (id) {
+      setVideoId(id);
+      setIsPrivacyMode(true); // Vždy zahájit v privacy mode
+    } else {
+      alert('Neplatná YouTube URL');
+    }
+  };
+
+  const onReady: YouTubeProps['onReady'] = (event) => {
+    playerRef.current = event.target;
+    setDuration(event.target.getDuration());
+    event.target.setVolume(volume);
+  };
+
+  const onStateChange: YouTubeProps['onStateChange'] = (event) => {
+    // 1 = playing, 2 = paused
+    setIsPlaying(event.data === 1);
+  };
+
+  const togglePlayPause = () => {
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+      } else {
+        playerRef.current.playVideo();
+      }
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+    if (playerRef.current) {
+      playerRef.current.setVolume(newVolume);
+    }
+  };
+
+  const handleProgressChange = (newTime: number) => {
+    setCurrentTime(newTime);
+    if (playerRef.current) {
+      playerRef.current.seekTo(newTime, true);
+    }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleRevealPress = () => {
+    setIsRevealing(true);
+  };
+
+  const handleRevealRelease = () => {
+    setIsRevealing(false);
+  };
+
+  // Update current time každou sekundu
+  useEffect(() => {
+    if (isPlaying && playerRef.current) {
+      intervalRef.current = setInterval(async () => {
+        if (playerRef.current) {
+          const time = await playerRef.current.getCurrentTime();
+          setCurrentTime(time);
+        }
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPlaying]);
+
+  const opts: YouTubeProps['opts'] = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      modestbranding: 1,
+      rel: 0,
+    },
+  };
+
+  return (
+    <div className="w-full space-y-6">
+      {/* Back Button */}
+      <div className="flex items-center gap-2 mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Zpět
+        </Link>
+      </div>
+
+      {/* Player Container */}
+      <div className="max-w-4xl mx-auto w-full">
+        {/* URL Input */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Nebo načíst jiné video</h2>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="Vlož YouTube URL zde..."
+              className="flex-1 px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyPress={(e) => e.key === 'Enter' && handleLoadVideo()}
+            />
+            <button
+              onClick={handleLoadVideo}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Načíst
+            </button>
+          </div>
+        </div>
+
+      {/* Player */}
+      {videoId && (
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+          <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
+            {/* YouTube Player - skrytý pod vrstvou */}
+            <div className={`absolute inset-0 ${isPrivacyMode && !isRevealing ? 'invisible' : 'visible'}`}>
+              <YouTube
+                videoId={videoId}
+                opts={opts}
+                onReady={onReady}
+                onStateChange={onStateChange}
+                className="w-full h-full"
+              />
+            </div>
+
+            {/* Privacy Overlay */}
+            {isPrivacyMode && (
+              <div className={`absolute inset-0 bg-black transition-opacity duration-200 ${isRevealing ? 'opacity-0' : 'opacity-100'}`}>
+                <div className="h-full flex flex-col items-center justify-center p-8">
+                  {/* Název videa/info */}
+                  <div className="text-center mb-8">
+                    <div className="text-gray-500 text-sm mb-2">🔒 Privacy Mode Aktivní</div>
+                    <div className="text-gray-400 text-xs">Video běží na pozadí</div>
+                  </div>
+
+                  {/* Custom Controls */}
+                  <div className="w-full max-w-md space-y-6">
+                    {/* Play/Pause Button */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={togglePlayPause}
+                        className="w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 flex items-center justify-center transition-all hover:scale-110"
+                        aria-label={isPlaying ? 'Pause' : 'Play'}
+                      >
+                        {isPlaying ? (
+                          // Pause icon
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          // Play icon
+                          <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max={duration || 100}
+                        value={currentTime}
+                        onChange={(e) => handleProgressChange(Number(e.target.value))}
+                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                        aria-label="Časová osa videa"
+                      />
+                      <div className="flex justify-between text-xs text-gray-400">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+
+                    {/* Volume Control */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+                        </svg>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={volume}
+                          onChange={(e) => handleVolumeChange(Number(e.target.value))}
+                          className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                          aria-label="Hlasitost"
+                        />
+                        <span className="text-sm text-gray-400 w-12 text-right">{volume}%</span>
+                      </div>
+                    </div>
+
+                    {/* Reveal Button */}
+                    <div className="pt-4 border-t border-gray-700/50">
+                      <button
+                        onMouseDown={handleRevealPress}
+                        onMouseUp={handleRevealRelease}
+                        onMouseLeave={handleRevealRelease}
+                        onTouchStart={handleRevealPress}
+                        onTouchEnd={handleRevealRelease}
+                        className="w-full py-2 bg-gray-700/30 hover:bg-gray-700/50 text-gray-400 rounded-lg text-sm transition-colors"
+                      >
+                        {isRevealing ? '👁️ Viditelné' : '🔒 Podrž pro odkrytí'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Privacy Mode Toggle */}
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              {isPrivacyMode ? '🔒 Privacy Mode: Zapnuto' : '👁️ Privacy Mode: Vypnuto'}
+            </div>
+            <button
+              onClick={() => setIsPrivacyMode(!isPrivacyMode)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isPrivacyMode
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              }`}
+            >
+              {isPrivacyMode ? 'Trvale vypnout' : 'Zapnout Privacy Mode'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Info */}
+      {!videoId && (
+        <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-8 border border-gray-700/30 text-center">
+          <div className="text-gray-400 mb-2">
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">Žádné video není načteno</h3>
+          <p className="text-gray-400 text-sm">
+            Vlož YouTube URL výše pro začátek přehrávání ve stealth módu
+          </p>
+        </div>
+      )}
+      </div>
+
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: white;
+          cursor: pointer;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: white;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+          background: #f0f0f0;
+        }
+
+        .slider::-moz-range-thumb:hover {
+          background: #f0f0f0;
+        }
+      `}</style>
+    </div>
+  );
+}
