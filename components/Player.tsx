@@ -17,15 +17,39 @@ export default function Player() {
   const [duration, setDuration] = useState(0);
   const [isPrivacyMode, setIsPrivacyMode] = useState(true);
   const [isRevealing, setIsRevealing] = useState(false);
+  const [savedVideos, setSavedVideos] = useState<string[]>([]);
   const playerRef = useRef<YouTubePlayer | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load saved videos from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('savedVideos');
+    if (saved) {
+      try {
+        setSavedVideos(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse saved videos', e);
+      }
+    }
+  }, []);
 
   // Extrakce YouTube video ID z URL
   const extractVideoId = (url: string): string | null => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
     const match = url.match(regExp);
-    return match && match[7].length === 11 ? match[7] : null;
+    const id = match?.[match.length - 1];
+    return id && id.length === 11 ? id : null;
   };
+
+  const toggleSavedVideo = (id: string) => {
+    const updated = savedVideos.includes(id)
+      ? savedVideos.filter((vid) => vid !== id)
+      : [...savedVideos, id];
+    setSavedVideos(updated);
+    localStorage.setItem('savedVideos', JSON.stringify(updated));
+  };
+
+  const isSaved = (id: string) => savedVideos.includes(id);
 
   const handleLoadVideo = () => {
     const id = extractVideoId(videoUrl);
@@ -261,20 +285,36 @@ export default function Player() {
           </div>
 
           {/* Privacy Mode Toggle */}
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between gap-3">
             <div className="text-sm text-gray-400">
               {isPrivacyMode ? '🔒 Privacy Mode: Zapnuto' : '👁️ Privacy Mode: Vypnuto'}
             </div>
-            <button
-              onClick={() => setIsPrivacyMode(!isPrivacyMode)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isPrivacyMode
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              }`}
-            >
-              {isPrivacyMode ? 'Trvale vypnout' : 'Zapnout Privacy Mode'}
-            </button>
+            <div className="flex gap-3">
+              {videoId && (
+                <button
+                  onClick={() => toggleSavedVideo(videoId)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    isSaved(videoId)
+                      ? 'bg-red-600/30 hover:bg-red-600/40 text-red-400 border border-red-600/50'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-600'
+                  }`}
+                  title={isSaved(videoId) ? 'Odebrat z uložených' : 'Přidat do uložených'}
+                >
+                  <span className="text-lg">❤️</span>
+                  {isSaved(videoId) ? 'Uloženo' : 'Uložit'}
+                </button>
+              )}
+              <button
+                onClick={() => setIsPrivacyMode(!isPrivacyMode)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isPrivacyMode
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                {isPrivacyMode ? 'Trvale vypnout' : 'Zapnout Privacy Mode'}
+              </button>
+            </div>
           </div>
         </div>
       )}

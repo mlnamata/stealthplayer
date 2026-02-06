@@ -109,7 +109,7 @@ export default function Home() {
     }
   };
 
-  const VideoCard = ({ video, showSavedButton = true }: { video: Video; showSavedButton?: boolean }) => (
+  const VideoCard = ({ video }: { video: Video }) => (
     <div className="group relative overflow-hidden rounded-lg bg-gray-800/50 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
       <Link href={`/player?v=${video.id}`} onClick={() => addRecentVideo(video)} className="block relative aspect-video bg-gray-900 overflow-hidden">
         <img
@@ -132,25 +132,9 @@ export default function Home() {
         </div>
       </Link>
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="text-white font-medium line-clamp-2 group-hover:text-blue-400 transition-colors text-sm flex-1">
-            {video.title}
-          </h4>
-          {showSavedButton && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                toggleSavedVideo(video.id);
-              }}
-              className={`flex-shrink-0 text-lg transition-colors ${
-                isSaved(video.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
-              }`}
-              title={isSaved(video.id) ? 'Odebrat z uložených' : 'Přidat do uložených'}
-            >
-              ❤️
-            </button>
-          )}
-        </div>
+        <h4 className="text-white font-medium line-clamp-2 group-hover:text-blue-400 transition-colors text-sm">
+          {video.title}
+        </h4>
       </div>
     </div>
   );
