@@ -16,34 +16,34 @@ interface RecentVideo extends Video {
 
 const ASMR_VIDEOS = [
   {
-    id: '8bPmOJZcIYo',
-    title: 'ASMR Head & Shoulder Massage with Whispers',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/8bPmOJZcIYo/maxresdefault.jpg',
-  },
-  {
-    id: 'mWz1u-vJAzk',
-    title: 'ASMR Relaxing Scalp Massage & Scratching',
-    category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/mWz1u-vJAzk/maxresdefault.jpg',
-  },
-  {
-    id: 'iHKJl35-nxA',
-    title: 'ASMR Deep Relaxation - 3 Hour Sleep Meditation',
+    id: '7rLlLPVEu1I',
+    title: 'ASMR Relaxing Sleep Music - 10 Hour Sleep Meditation',
     category: 'Sleep',
-    thumbnail: 'https://i.ytimg.com/vi/iHKJl35-nxA/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/7rLlLPVEu1I/maxresdefault.jpg',
   },
   {
-    id: 'd_FNzHwXPiE',
-    title: 'ASMR Spa Facial Massage with Soft Speaking',
-    category: 'Wellness',
-    thumbnail: 'https://i.ytimg.com/vi/d_FNzHwXPiE/maxresdefault.jpg',
-  },
-  {
-    id: 'fO-3vVYYKa8',
-    title: 'ASMR Haircut & Hair Brushing Roleplay',
+    id: 'wlWnc44x0CQ',
+    title: 'ASMR Inaudible Whispering - Relaxation',
     category: 'ASMR',
-    thumbnail: 'https://i.ytimg.com/vi/fO-3vVYYKa8/maxresdefault.jpg',
+    thumbnail: 'https://i.ytimg.com/vi/wlWnc44x0CQ/maxresdefault.jpg',
+  },
+  {
+    id: 'F80VEfukBsk',
+    title: 'ASMR Deep Sleep & Relaxation - 8 Hours',
+    category: 'Sleep',
+    thumbnail: 'https://i.ytimg.com/vi/F80VEfukBsk/maxresdefault.jpg',
+  },
+  {
+    id: 'TzPnPBlC5Q0',
+    title: 'ASMR Personal Attention - Soft Spoken',
+    category: 'ASMR',
+    thumbnail: 'https://i.ytimg.com/vi/TzPnPBlC5Q0/maxresdefault.jpg',
+  },
+  {
+    id: 'Fzis5VJfqFo',
+    title: 'ASMR Relaxing Ambience - Nature Sounds',
+    category: 'Nature',
+    thumbnail: 'https://i.ytimg.com/vi/Fzis5VJfqFo/maxresdefault.jpg',
   },
 ];
 
