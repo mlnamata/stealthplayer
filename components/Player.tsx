@@ -10,6 +10,13 @@ interface QueueItem {
   title: string;
 }
 
+interface Video {
+  id: string;
+  title: string;
+  category: string;
+  thumbnail: string;
+}
+
 // Error boundary component
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   constructor(props: {children: React.ReactNode}) {
@@ -58,7 +65,7 @@ export default function Player() {
   const [duration, setDuration] = useState(0);
   const [isPrivacyMode, setIsPrivacyMode] = useState(true);
   const [isRevealing, setIsRevealing] = useState(false);
-  const [savedVideos, setSavedVideos] = useState<string[]>([]);
+  const [savedVideos, setSavedVideos] = useState<Video[]>([]);
   const [queueVideos, setQueueVideos] = useState<QueueItem[]>([]);
   const [currentQueueIndex, setCurrentQueueIndex] = useState(-1);
   const [queueError, setQueueError] = useState('');
@@ -70,7 +77,8 @@ export default function Player() {
     const saved = localStorage.getItem('savedVideos');
     if (saved) {
       try {
-        setSavedVideos(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setSavedVideos(Array.isArray(parsed) ? parsed : []);
       } catch (e) {
         console.error('Failed to parse saved videos', e);
       }
@@ -119,15 +127,27 @@ export default function Player() {
     return id && id.length === 11 ? id : null;
   };
 
-  const toggleSavedVideo = (id: string) => {
-    const updated = savedVideos.includes(id)
-      ? savedVideos.filter((vid) => vid !== id)
-      : [...savedVideos, id];
+  const toggleSavedVideo = (id: string, title?: string) => {
+    const isSavedAlready = savedVideos.some((v) => v.id === id);
+    let updated: Video[];
+    
+    if (isSavedAlready) {
+      updated = savedVideos.filter((v) => v.id !== id);
+    } else {
+      const video: Video = {
+        id,
+        title: title || `Video ${id}`,
+        category: 'Custom',
+        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+      };
+      updated = [...savedVideos, video];
+    }
+    
     setSavedVideos(updated);
     localStorage.setItem('savedVideos', JSON.stringify(updated));
   };
 
-  const isSaved = (id: string) => savedVideos.includes(id);
+  const isSaved = (id: string) => savedVideos.some((v) => v.id === id);
 
   const onError: YouTubeProps['onError'] = (error) => {
     // Log error but don't stop playback
@@ -243,14 +263,11 @@ export default function Player() {
     setIsPlaying(event.data === 1);
 
     if (event.data === 0 && currentQueueIndex >= 0) {
-      const nextIndex = currentQueueIndex + 1;
-      if (nextIndex < queueVideos.length) {
-        const nextVideo = queueVideos[nextIndex];
-        if (nextVideo) {
-          setVideoId(nextVideo.id);
-          setIsPrivacyMode(true);
-          setCurrentQueueIndex(nextIndex);
-        }
+      const currentVideo = queueVideos[currentQueueIndex];
+      
+      // Remove current video from queue
+      if (currentVideo) {
+        removeFromQueue(currentVideo.id);
       }
     }
   };
