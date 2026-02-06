@@ -1,9 +1,45 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import YouTube, { YouTubeProps, YouTubePlayer } from 'react-youtube';
+
+// Error boundary component
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('Player error:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
+          <div className="text-center text-gray-400">
+            <p className="mb-2">⚠️ Chyba při načítání videa</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+            >
+              Znovu načíst
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 export default function Player() {
   const searchParams = useSearchParams();
@@ -43,6 +79,21 @@ export default function Player() {
     }
   }, [searchParams]);
 
+  // Suppress cross-origin iframe errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Ignore cross-origin errors from iframe
+      if (event.message === 'Script error.' || !event.filename) {
+        event.preventDefault();
+        return true;
+      }
+      return false;
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
   // Extrakce YouTube video ID z URL
   const extractVideoId = (url: string): string | null => {
     const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -60,6 +111,11 @@ export default function Player() {
   };
 
   const isSaved = (id: string) => savedVideos.includes(id);
+
+  const onError: YouTubeProps['onError'] = (error) => {
+    // Log error but don't stop playback
+    console.error('YouTube error:', error);
+  };
 
   const handleLoadVideo = () => {
     const id = extractVideoId(videoUrl);
@@ -154,7 +210,8 @@ export default function Player() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <ErrorBoundary>
+      <div className="w-full space-y-6">
       {/* Back Button */}
       <div className="flex items-center gap-2 mb-6">
         <Link
@@ -202,6 +259,7 @@ export default function Player() {
                 opts={opts}
                 onReady={onReady}
                 onStateChange={onStateChange}
+                onError={onError}
               />
             </div>
 
@@ -375,5 +433,6 @@ export default function Player() {
         }
       `}</style>
     </div>
+    </ErrorBoundary>
   );
 }
