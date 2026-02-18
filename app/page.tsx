@@ -24,7 +24,7 @@ export default function Home() {
   const [customUrl, setCustomUrl] = useState('');
   const [urlError, setUrlError] = useState('');
   const [recentVideos, setRecentVideos] = useState<RecentVideo[]>([]);
-  const [savedVideos, setSavedVideos] = useState<string[]>([]);
+  const [savedVideos, setSavedVideos] = useState<Video[]>([]);
   const [queueVideos, setQueueVideos] = useState<QueueItem[]>([]);
   const [queueError, setQueueError] = useState('');
 
@@ -43,7 +43,8 @@ export default function Home() {
     const savedStored = localStorage.getItem('savedVideos');
     if (savedStored) {
       try {
-        setSavedVideos(JSON.parse(savedStored));
+        const parsed = JSON.parse(savedStored);
+        setSavedVideos(Array.isArray(parsed) ? parsed : []);
       } catch (e) {
         console.error('Failed to parse saved videos', e);
       }
@@ -74,15 +75,16 @@ export default function Home() {
     localStorage.setItem('recentVideos', JSON.stringify(updated));
   };
 
-  const toggleSavedVideo = (videoId: string) => {
-    const updated = savedVideos.includes(videoId)
-      ? savedVideos.filter((id) => id !== videoId)
-      : [...savedVideos, videoId];
+  const toggleSavedVideo = (video: Video) => {
+    const isSaved = savedVideos.some((v) => v.id === video.id);
+    const updated = isSaved
+      ? savedVideos.filter((v) => v.id !== video.id)
+      : [...savedVideos, video];
     setSavedVideos(updated);
     localStorage.setItem('savedVideos', JSON.stringify(updated));
   };
 
-  const isSaved = (videoId: string) => savedVideos.includes(videoId);
+  const isSaved = (videoId: string) => savedVideos.some((v) => v.id === videoId);
 
   const handleCustomUrl = (e: React.FormEvent) => {
     e.preventDefault();
@@ -296,11 +298,41 @@ export default function Home() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {recentVideos
-                .filter((video) => savedVideos.includes(video.id))
-                .map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))}
+              {savedVideos.map((video) => (
+                <div key={video.id} className="group relative overflow-hidden rounded-lg bg-gray-800/50 border border-gray-700/50 hover:border-blue-500/50 transition-all hover:scale-105">
+                  <Link href={`/player?v=${video.id}`} className="block relative aspect-video bg-gray-900 overflow-hidden">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 300%22%3E%3Crect fill=%22%23333%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22%23999%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3EVideo%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-colors">
+                      <svg className="w-12 h-12 text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <span className="px-2 py-1 bg-blue-600/80 text-white text-xs rounded font-medium">
+                        {video.category}
+                      </span>
+                    </div>
+                  </Link>
+                  <div className="p-4">
+                    <h4 className="text-white font-medium line-clamp-2 group-hover:text-blue-400 transition-colors text-sm">
+                      {video.title}
+                    </h4>
+                    <button
+                      onClick={() => toggleSavedVideo(video)}
+                      className="mt-2 w-full px-2 py-1 bg-red-600/30 hover:bg-red-600/40 text-red-400 text-xs rounded font-medium transition-colors"
+                    >
+                      Odstranit
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         )}
